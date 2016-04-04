@@ -1,7 +1,7 @@
 install
 text
 skipx
-url --url http://mirror.rackspace.com/CentOS/6.5/os/x86_64/
+url --url http://mirror.rackspace.com/CentOS/6/os/x86_64/
 lang en_US.UTF-8
 keyboard us
 reboot
