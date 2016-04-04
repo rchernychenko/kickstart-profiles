@@ -1,108 +1,39 @@
+# Install OS instead of upgrade
 install
-text
-skipx
-url --url http://mirror.rackspace.com/CentOS/6/os/x86_64/
-lang en_US.UTF-8
-keyboard us
+# Firewall configuration
+firewall --enabled --ssh
+# Keyboard layouts
+keyboard 'us'# Use network installation
+url --url="http://mirror.centos.org/centos/6/os/x86_64"
+# Network information
+network  --bootproto=dhcp --device=eth0
+# Reboot after installation
 reboot
-network --onboot yes --device eth0 --bootproto dhcp --noipv6
-rootpw changeme
-selinux --disabled
-firewall --disabled
-authconfig --enableshadow --enablemd5
-timezone America/Chicago
-zerombr
+# Root password
+rootpw sevenn
+# System timezone
+timezone America/Sao_Paulo
+# System authorization information
+auth  --useshadow  --passalgo=md5
+# Use text mode install
+text
+# System language
+lang en_US
+# SELinux configuration
+selinux --enforcing
+# Do not configure the X Window System
+skipx
+
+# System bootloader configuration
 bootloader --location=mbr
-clearpart --all --initlabel
-part /boot --fstype ext3 --size=200 --ondisk=sda --asprimary
-part swap --size=1024 --ondisk=sda --asprimary
-part / --fstype=ext3 --size=100 --grow --ondisk=sda --asprimary
-services --enabled=network,nfs,ntpd,nrpe,portmap,snmpd
-services --disabled=smb,auditd,avahi-daemon,autofs,bluetooth,cups,gpm,haldaemon,httpd,irqbalance,ip6tables,lm_sensors,nfslock,ntop,pcscd,rpcgssd,restorecond,rpcidmapd,winbind,yum-updatesd
-#
-%packages --nobase
-openssh-clients
-openssh-server
-cronie-noanacron
-crontabs
-logrotate
-wget
-gcc
-vim-enhanced
-ntp
-net-snmp
-strace
-bzip2
--b43*
--iwl*
--rt73*
--wireless-tools*
--ql*
--ipw*
--aic*
-%end
-%post --log=/root/kspost.log
-#
-# Setup Variables
-#
-OSDIST="centos"
-KSHOSTNAME="http://example.com"
-KSAPPS="$KSHOSTNAME/ks/apps"
-KSCONF="$KSHOSTNAME/ks/conf"
-KSAPPSDIST="$KSHOSTNAME/ks/$OSDIST/apps"
-KSCONFDIST="$KSHOSTNAME/ks/$OSDIST/conf"
-WGET_CMD="/usr/bin/wget -q -O"
-RPM_CMD="rpm -i --nodeps"
-YUM_CMD="/usr/bin/yum"
-SED_CMD="/bin/sed -i"
-#
-mkdir -p /root/kickstart
-#
-# Setup ssh keys
-#
-echo "POST: NTP"
-# NTP configuration contains private data
-#
-# use local repository mirror
-#
-echo "POST: COA CentOS Repo"
-/bin/mv /etc/yum.repos.d/CentOS*.repo /tmp/
-/bin/sed 's/^mirrorlist/\#mirrorlist/; s/\#baseurl/baseurl/; s/mirror\.centos\.org/example\.com/' /tmp/CentOS-Base.repo > /etc/yum.repos.d/CentOS.repo
-#
-# Install RPM Forge & Nagios required packages
-#
-echo "POST: RPM Forge"
-$WGET_CMD /root/kickstart/rpmforge.rpm $KSAPPS/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm
-$WGET_CMD /root/kickstart/rpmforge.txt $KSAPPS/RPM-GPG-KEY.dag.txt
-rpm --import /root/kickstart/rpmforge.txt
-$RPM_CMD /root/kickstart/rpmforge.rpm
-# Create Message of the Day
-echo "POST: Message of the Day"
-cat >> /etc/motd << EOF
-******************************************************************************
-                            NOTICE TO USERS
+# Clear the Master Boot Record
+zerombr
+# Partition clearing information
+clearpart --all
+# Auto-partition
+autopart
 
-This computer system is for authorized use only. Users (authorized or
-unauthorized) have no explicit or implicit expectation of privacy.
-
-Any or all uses of this system and all files on this system may be
-intercepted, monitored, recorded, copied, audited, inspected, and disclosed to
-authorized site and law enforcement personnel.
-
-By using this system, the user consents to such interception, monitoring,
-recording, copying, auditing, inspection, and disclosure at the discretion of
-authorized site.
-
-Unauthorized or improper use of this system may result in administrative
-disciplinary action and civil and criminal penalties. By continuing to use
-this system you indicate your awareness of and consent to these terms and
-conditions of use. LOG OFF IMMEDIATELY if you do not agree to the conditions
-stated in this warning.
-******************************************************************************
-EOF
-#
-cd /tmp
-/usr/bin/yum -y update  >> /root/post_update.log
-/usr/bin/yum -y upgrade >> /root/post_upgrade.log
-echo "POST: DONE!"
+%packages --nobase --excludedocs
+@base
+nano
 %end
